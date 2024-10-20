@@ -15,11 +15,11 @@ class BukuController extends Controller
             'harga' => 'required|integer|min:1000',
             'penulis' => 'required|string',
             'stok' => 'required|integer',
-            'kategori_id' => 'required|exists:kategoris,id'
+            'kategori_id' => 'required|exists:kategoris,id'  // Validasi kategori_id
         ]);
 
-        $buku = Buku::create($validated);
-        return response()->json($buku, 201);
+        $buku = Buku::create($validated);  // Menyimpan data yang tervalidasi
+        return response()->json($buku, 201);  // Mengembalikan data buku yang dibuat
     }
 
     // Memperbarui data buku
@@ -33,43 +33,76 @@ class BukuController extends Controller
             'kategori_id' => 'required|exists:kategoris,id'
         ]);
 
-        $buku = Buku::findOrFail($id);
-        $buku->update($validated);
-        return response()->json($buku, 200);
+        $buku = Buku::findOrFail($id);  // Mencari buku berdasarkan ID
+        $buku->update($validated);  // Memperbarui data buku
+        return response()->json($buku, 200);  // Mengembalikan data buku yang telah diperbarui
     }
+
+    // Pencarian buku berdasarkan nama buku atau kategori
     public function cari(Request $request)
+    {
+        $query = $request->input('query');
+
+        // Pencarian berdasarkan nama buku atau nama kategori
+        $bukus = Buku::where('nama', 'like', "%$query%")
+                     ->orWhereHas('kategori', function ($q) use ($query) {
+                         $q->where('nama_kategori', 'like', "%$query%");  // Pastikan kolom kategori yang digunakan benar
+                     })
+                     ->get();
+
+        return response()->json($bukus);
+    }
+
+    // Menampilkan semua buku
+    public function index()
+    {
+        $bukus = Buku::all();  // Mengambil semua data buku dari database
+        return response()->json($bukus);  // Mengembalikan data buku dalam bentuk JSON
+    }
+
+    // Menampilkan detail buku berdasarkan ID
+    public function show($id)
+    {
+        $buku = Buku::find($id);
+
+        if (!$buku) {
+            return response()->json([
+                'message' => "Buku dengan ID $id tidak ditemukan"
+            ], 404);  // Mengembalikan error jika buku tidak ditemukan
+        }
+
+        return response()->json($buku);  // Mengembalikan data buku
+    }
+
+    // Pencarian buku berdasarkan nama atau kategori_id
+    public function search(Request $request)
 {
-    $query = $request->input('query');
+    // Membuat query untuk mencari buku
+    $query = Buku::query();
 
-    // Pencarian berdasarkan nama buku atau nama kategori
-    $bukus = Buku::where('nama', 'like', "%$query%")
-                 ->orWhereHas('kategori', function ($q) use ($query) {
-                     $q->where('nama', 'like', "%$query%");
-                 })
-                 ->get();
+    // Cari berdasarkan judul buku (gunakan kolom 'judul' yang benar)
+    if ($request->has('judul')) {
+        $query->where('judul', 'like', '%' . $request->input('judul') . '%');  // Mengganti 'nama' dengan 'judul'
+    }
 
-    return response()->json($bukus);
-}
+    // Cari berdasarkan kategori_id jika ada parameter 'kategori_id'
+    if ($request->has('kategori_id')) {
+        $query->where('kategori_id', $request->input('kategori_id'));
+    }
 
-public function index()
-{
-    $bukus = Buku::all(); // Mengambil semua data buku dari database
-    return response()->json($bukus); // Mengembalikan data buku dalam bentuk JSON
-}
+    // Jalankan query dan ambil hasil pencarian
+    $bukus = $query->get();
 
-public function show($id)
-{
-    $buku = Buku::find($id);
-
-    if (!$buku) {
+    // Jika tidak ada hasil, kembalikan pesan error
+    if ($bukus->isEmpty()) {
         return response()->json([
-            'message' => "Buku dengan ID $id tidak ditemukan"
+            'message' => 'Tidak ada buku yang ditemukan dengan kriteria pencarian.',
         ], 404);
     }
 
-    return response()->json($buku);
+    // Kembalikan data buku yang ditemukan
+    return response()->json($bukus, 200);
 }
-    
 
 
 }
