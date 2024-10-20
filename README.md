@@ -23,8 +23,10 @@ ini hasil akhir dari kategoris
 ini hasil akhir dari bukus
 
 ![endpoint baru menggunakan id](https://github.com/user-attachments/assets/517b90b8-6a14-48d6-b380-ecfc7dcf9025)
-dan ini hasil dari menggunakan endpoint baru untuk mencari buku menggunakan id kalau menggunakan kategoris buku tidak ditemukan padahal di cek menggunakan php tinker
-itu keliatan semua
+dan ini hasil dari menggunakan endpoint baru untuk mencari buku menggunakan id 
+
+![Screenshot 2024-10-20 165119](https://github.com/user-attachments/assets/3f872926-11d6-4fda-a833-a356f4acc5af)
+ini hasil dari menggunakan endpoint baru untuk mencari bukus berdasarkan judul dan kategori_id
 
 <img width="959" alt="image" src="https://github.com/user-attachments/assets/f4c23bb5-22d4-4e30-ba74-f3477de435cb">
 ini tampilan dari ports
